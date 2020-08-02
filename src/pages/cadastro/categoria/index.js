@@ -1,67 +1,88 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import PageDefault from '../../../components/PageDefault';
+import FormField from '../../../components/FormField';
+import Button from '../../../components/Button';
 
 export default function CadastroCategoria() {
-    const valoresIniciais = {
-        nome: '',
-        descricao: '',
-        cor: 'red'
-    }
-    const [valores, setValores] = useState(valoresIniciais);
-    const [categorias, setCategorias] = useState([])
+  const valoresIniciais = {
+    nome: '',
+    descricao: '',
+    cor: 'red',
+  };
+  const [valores, setValores] = useState(valoresIniciais);
+  const [categorias, setCategorias] = useState([]);
 
-    function setValor(chave, valor){
-        setValores({...valores, [chave]: valor});
-    }
-    return (
+  function setValor(chave, valor) {
+    setValores({ ...valores, [chave]: valor });
+  }
 
-        <PageDefault>
-            <h1>Cadastro de Categoria: {valores.nome}</h1>
-            <form onSubmit={function handleSubmit(infoDoEvento) {
-                infoDoEvento.preventDefault();
-                setCategorias(prev => [...prev, valores])
-                setValores(valoresIniciais                                    )
-            }}>
-                <div>
-                    <label>Nome da Categoria</label>
-                    <input
-                        value={valores.nome}
-                        onChange={({ target }) => {
-                            setValor('nome', target.value)
-                        }}
-                        type='text' />
-                </div>
-                <div>
-                    <label>Descrição</label>
-                    <textarea
-                        value={valores.descricao}
-                        onChange={({ target }) => {
-                            setValor('descricao', target.value)
-                        }}
-                        type='text' />
-                </div>
-                <div>
-                    <label>Nome da Categoria</label>
-                    <input
-                        value={valores.cor}
-                        onChange={({ target }) => {
-                            setValor('cor', target.value)
-                        }}
-                        type='color' />
-                </div>
+  function handleChange(infosDoEvento) {
+    const { name, value } = infosDoEvento.target;
+    setValor(name, value);
+  }
 
-                <button>Cadastrar</button>
-            </form>
-            <ul>
-                {categorias.map((categoria, index) => (<li key={index}>{categoria.nome}</li>))
+  useEffect(() => {
+   const URL = 'http://localhost:8080/categorias'
+   fetch(URL).then(async (respostaDoServidor) => {
+     const resposta = await respostaDoServidor.json();
+     setCategorias([
+       ...resposta
+      ])
+   })
+   
+  }, [])
+  return (
+    <PageDefault>
+      <h1>
+        Cadastro de Categoria:
+        {valores.nome}
+      </h1>
+      <form onSubmit={function handleSubmit(infoDoEvento) {
+        infoDoEvento.preventDefault();
+        setCategorias((prev) => [...prev, valores]);
+        setValores(valoresIniciais);
+      }}
+      >
+        <FormField
+          value={valores.nome}
+          onChange={handleChange}
+          name={'nome'}
+          type={'text'}
+          label="Nome da Categoria"
+        />
+         <FormField
+          value={valores.descricao}
+          onChange={handleChange}
+          name={'descricao'}
+          type={'textarea'}
+          label="Descrição"
+        />
 
-                }
-            </ul>
-            <Link to={'/'}>
-                Ir para home
-                </Link>
-        </PageDefault>
+        <FormField
+          label="Cor"
+          value={valores.cor}
+          name='cor'
+          onChange={handleChange}
+          type="color"
+        />
+        
+        <Button>Cadastrar</Button>
+      </form>
 
-    )
+
+      {categorias.length === 0 && (
+        <div>
+            Loading...
+        </div>
+      ) }
+      <ul>
+        {categorias.map((categoria, index) => (<li key={index}>{categoria.nome}</li>))}
+      </ul>
+      <Link to="/">
+        Ir para home
+      </Link>
+    </PageDefault>
+
+  );
 }
