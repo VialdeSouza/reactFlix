@@ -23,7 +23,8 @@ export default function CadastroCategoria() {
   }
 
   useEffect(() => {
-   const URL = 'http://localhost:8080/categorias'
+   const isDevelopment = window.location.hostname.includes('localhost')
+   const URL = isDevelopment? 'http://localhost:8080/categorias' : 'https://tamyflix.herokuapp.com/categorias'
    fetch(URL).then(async (respostaDoServidor) => {
      const resposta = await respostaDoServidor.json();
      setCategorias([
